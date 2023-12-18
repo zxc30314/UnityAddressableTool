@@ -21,17 +21,9 @@ public class TestMemoryProfiler : MonoBehaviour
 
     async Task InstantiateAsync()
     {
-        try
-        {
-            var instantiateAsyncTask = await assetReference.BundleInstantiateAsync<Transform>();
-            await Task.Delay(1000);
-            Destroy(instantiateAsyncTask.gameObject);
-        }
-        catch (Exception e)
-        {
-            Debug.LogError(e);
-            throw;
-        }
+        var instantiateAsyncTask = await assetReference.BundleInstantiateAsync<Transform>();
+        await Task.Delay(1000);
+        Destroy(instantiateAsyncTask.gameObject);
     }
     
     async Task BundleLoadAsync()
