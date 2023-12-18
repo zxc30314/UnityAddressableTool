@@ -11,27 +11,51 @@ public static class BundleLoaderExpansion
 {
     public static IObservable<T> BundleLoadAsync<T>(this AssetReference reference) where T : Component
     {
+        if (string.IsNullOrEmpty(reference?.AssetGUID))
+        {
+            return Observable.Throw<T>(new ArgumentNullException());
+        }
+        
         return BundleLoader.BundleLoadAsync<T>(reference);
     }
 
     public static IObservable<T> BundleInstantiateAsync<T>(this AssetReference reference, Vector3 position, Quaternion rotation, Transform parent) where T : Component
     {
+        if (string.IsNullOrEmpty(reference?.AssetGUID))
+        {
+            return Observable.Throw<T>(new ArgumentNullException());
+        }
+        
         return InstantiateAsyncTask<T>(reference, position, rotation, parent).ToObservable();
     }
 
     public static IObservable<T> BundleInstantiateAsync<T>(this AssetReference reference, Transform parent = null, bool instantiateInWorldSpace = false) where T : Component
     {
+        if (string.IsNullOrEmpty(reference?.AssetGUID))
+        {
+            return Observable.Throw<T>(new ArgumentNullException());
+        }
         return InstantiateAsyncTask<T>(reference, parent, instantiateInWorldSpace).ToObservable();
     }
 
     private static async UniTask<T> InstantiateAsyncTask<T>(this AssetReference reference, Vector3 position, Quaternion rotation, Transform parent = null) where T : Component
     {
+        if (string.IsNullOrEmpty(reference?.AssetGUID))
+        {
+            throw new ArgumentNullException();
+        }
+
         var asyncOperationHandle = reference.InstantiateAsync(position, rotation, parent);
         return await BundleLoader.InstantiateAsyncTask<T>(asyncOperationHandle);
     }
 
     private static async UniTask<T> InstantiateAsyncTask<T>(this AssetReference reference, Transform parent = null, bool instantiateInWorldSpace = false) where T : Component
     {
+        if (string.IsNullOrEmpty(reference?.AssetGUID))
+        {
+            throw new ArgumentNullException();
+        }
+
         var asyncOperationHandle = reference.InstantiateAsync(parent, instantiateInWorldSpace);
         return await BundleLoader.InstantiateAsyncTask<T>(asyncOperationHandle);
     }
@@ -55,6 +79,30 @@ public static class BundleLoader
         }
 
         return BundleLoadAsyncAndAddToContainerTask(reference).ToObservable().Select(GetComponent<T>);
+    }
+
+    public static async UniTask<T> InstantiateAsyncTask<T>(AsyncOperationHandle<GameObject> handle) where T : Component
+    {
+        await handle.Task;
+        if (!handle.Result.TryGetComponent<T>(out var result))
+        {
+            Object.Destroy(handle.Result);
+            Addressables.ReleaseInstance(handle);
+            throw new MissingComponentException();
+        }
+
+        Disposable.Create(() => { Addressables.ReleaseInstance(handle); }).AddTo(result);
+        return result;
+    }
+
+    public static UniTask<AsyncOperationHandle<GameObject>> BundleLoadAsyncTask<T>(AssetReference reference) where T : Component
+    {
+        if (string.IsNullOrEmpty(reference?.AssetGUID))
+        {
+            throw new ArgumentNullException();
+        }
+
+        return BundleLoadAsyncAndAddToContainerTask(reference);
     }
 
     private static T GetComponent<T>(AsyncOperationHandle<GameObject> reference) where T : Component
@@ -107,20 +155,6 @@ public static class BundleLoader
         }
 
         return asyncOperationHandle;
-    }
-
-    public static async UniTask<T> InstantiateAsyncTask<T>(AsyncOperationHandle<GameObject> handle) where T : Component
-    {
-        await handle.Task;
-        if (!handle.Result.TryGetComponent<T>(out var result))
-        {
-            Object.Destroy(handle.Result);
-            Addressables.ReleaseInstance(handle);
-            throw new MissingComponentException();
-        }
-
-        Disposable.Create(() => { Addressables.ReleaseInstance(handle); }).AddTo(result);
-        return result;
     }
 
     public static void Release(AssetReference reference)
