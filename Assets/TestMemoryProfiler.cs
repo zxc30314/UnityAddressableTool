@@ -12,21 +12,21 @@ public class TestMemoryProfiler : MonoBehaviour
 {
     [SerializeField] private AssetReference assetReference;
 
-    async Task Start()
+    async UniTaskVoid Start()
     {
         await InstantiateAsync();
         await Task.Delay(1000);
         await BundleLoadAsync();
     }
 
-    async Task InstantiateAsync()
+    async UniTask InstantiateAsync()
     {
         var instantiateAsyncTask = await assetReference.BundleInstantiateAsync<Transform>();
         await Task.Delay(1000);
         Destroy(instantiateAsyncTask.gameObject);
     }
     
-    async Task BundleLoadAsync()
+    async UniTask BundleLoadAsync()
     {
         var instantiateAsyncTask = await assetReference.BundleLoadAsync<Transform>();
         var instantiate = Instantiate(instantiateAsyncTask);
@@ -34,5 +34,5 @@ public class TestMemoryProfiler : MonoBehaviour
         Destroy(instantiate.gameObject);
         assetReference.Release();
     }
-  
+
 }

@@ -8,11 +8,11 @@ using NUnit.Framework.Constraints;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UniRx;
+using UnityEngine.AddressableAssets;
 using Object = UnityEngine.Object;
 
 public class BundleLoadTest
 {
-
     [UnityTest]
     public IEnumerator BundleLoadAsync_NotHasComponent_ShouldBe_Throw_MissingComponentException()
     {
@@ -76,5 +76,4 @@ public class BundleLoadTest
 
         Assert.Throws<ArgumentNullException>(() => throw isError);
     }
-    
 }

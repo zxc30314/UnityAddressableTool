@@ -24,7 +24,7 @@ MonoBehaviour:
     - default
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 00a8aefca57b5ed49a1bc6b81b271c8d
-    m_Address: Assets/Cube.prefab
+    m_Address: Assets/TestObj.prefab
     m_ReadOnly: 0
     m_SerializedLabels:
     - default

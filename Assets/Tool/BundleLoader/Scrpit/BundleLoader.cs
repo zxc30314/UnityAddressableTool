@@ -62,42 +62,19 @@ public static class BundleLoader
 
     internal static async UniTask<T> InstantiateAsync<T>(AssetReference reference, Vector3 position, Quaternion rotation, Transform parent) where T : Component
     {
-        var handle = reference.InstantiateAsync(position, rotation,parent);
+        var handle = reference.InstantiateAsync(position, rotation, parent);
         return await GetComponentIFFailReleaseInstance<T>(handle);
     }
 
     internal static async UniTask<T> InstantiateAsync<T>(AssetReference reference, Transform parent = null, bool instantiateInWorldSpace = false) where T : Component
     {
         var handle = reference.InstantiateAsync(parent, instantiateInWorldSpace);
-        await handle.Task;
-        if (!handle.Result.TryGetComponent<T>(out var result))
-        {
-            Object.Destroy(handle.Result);
-            Addressables.ReleaseInstance(handle);
-            throw new MissingComponentException();
-        }
-
-        Disposable.Create(() => { Addressables.ReleaseInstance(handle); }).AddTo(result);
-        return result;
+        return await GetComponentIFFailReleaseInstance<T>(handle);
     }
 
     private static async UniTask<T> GetComponentIFFailReleaseInstance<T>(AsyncOperationHandle<GameObject> handle) where T : Component
     {
-        await handle.Task;
-        if (!handle.Result.TryGetComponent<T>(out var result))
-        {
-            Object.Destroy(handle.Result);
-            Addressables.ReleaseInstance(handle);
-            throw new MissingComponentException();
-        }
-
-        Disposable.Create(() => { Addressables.ReleaseInstance(handle); }).AddTo(result);
-        return result;
-    }
-
-    internal static async UniTask<T> InstantiateAsync<T>(AsyncOperationHandle<GameObject> handle) where T : Component
-    {
-        await handle.Task;
+        await handle;
         if (!handle.Result.TryGetComponent<T>(out var result))
         {
             Object.Destroy(handle.Result);
