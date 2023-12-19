@@ -15,14 +15,14 @@ public class TestMemoryProfiler : MonoBehaviour
     async UniTaskVoid Start()
     {
         await InstantiateAsync();
-        await Task.Delay(1000);
+        await UniTask.Delay(5000);
         await BundleLoadAsync();
     }
 
     async UniTask InstantiateAsync()
     {
         var instantiateAsyncTask = await assetReference.BundleInstantiateAsync<Transform>();
-        await Task.Delay(1000);
+        await UniTask.Delay(1000);
         Destroy(instantiateAsyncTask.gameObject);
     }
     
@@ -30,7 +30,7 @@ public class TestMemoryProfiler : MonoBehaviour
     {
         var instantiateAsyncTask = await assetReference.BundleLoadAsync<Transform>();
         var instantiate = Instantiate(instantiateAsyncTask);
-        await Task.Delay(1000);
+        await UniTask.Delay(1000);
         Destroy(instantiate.gameObject);
         assetReference.Release();
     }
